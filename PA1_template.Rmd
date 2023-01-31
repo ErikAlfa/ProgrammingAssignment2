@@ -1,0 +1,88 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
+
+
+## Loading and preprocessing the data
+I loaded the data and transformed it into a table.
+```{r}
+
+library(tidyverse)
+data <- read.csv("activity.csv")
+print(data)
+```
+
+
+
+
+
+## What is mean total number of steps taken per day?
+```{r}
+datasum <- data %>% 
+group_by(date) %>% 
+summarise(summatory=sum(steps))
+print(datasum)
+
+```
+```{r}
+hist(datasum$summatory)
+```
+I made an hinstrogram of the frequency and the steps.
+
+
+## What is the average daily activity pattern?
+
+```{r}
+mean(datasum$summatory, na.rm = TRUE) 
+median(datasum$summatory, na.rm = TRUE)
+x <- min(datasum$summatory, na.rm = TRUE) 
+```
+I calculated the mean and the median.
+
+## Imputing missing values
+```{r}
+data[is.na(data$steps),]
+nrow(data[is.na(data$steps),])
+```
+I fill the missing values so there aren't NA.
+
+```{r}
+data[is.na(data$steps),1] <- x
+print(data)
+```
+
+```{r}
+datasum <- data %>% 
+group_by(date) %>% 
+summarise(summatory=sum(steps))
+print(datasum)
+```
+```{r}
+hist(datasum$summatory)
+```
+```{r}
+mean(datasum$summatory, na.rm = TRUE) 
+median(datasum$summatory, na.rm = TRUE)
+```
+I calculated the mean and median again.
+The values changed.
+
+
+## Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+library(chron)
+data$weekend  <- as.factor(is.weekend(data$date))
+
+```
+```{r}
+library(lattice)
+stepsByDay <- aggregate(data$steps ~ data$interval + data$weekend, data, mean)
+colnames(stepsByDay) <- c("steps", "weekend", "interval")
+xyplot(steps ~ interval | weekend, stepsByDay, type = "l", layout = c(1, 2), 
+    xlab = "Interval", ylab = "Number of steps")
+```
+
